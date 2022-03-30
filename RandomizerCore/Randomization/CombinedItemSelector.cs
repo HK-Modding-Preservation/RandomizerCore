@@ -10,7 +10,7 @@ namespace RandomizerCore.Randomization
     {
         readonly GroupItemSelector[] selectors;
 
-        readonly PriorityQueue<float, GroupItemSelector> openSelectors;
+        readonly Collections.PriorityQueue<float, GroupItemSelector> openSelectors;
         readonly Stack<GroupItemSelector> proposeOrder;
         readonly Stack<GroupItemSelector> acceptOrder;
 
