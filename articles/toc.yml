@@ -1,2 +1,4 @@
-- name: Introduction
+- name: Home
   href: intro.md
+- name: Intro to State Logic
+  href: state.md
