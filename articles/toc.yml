@@ -1,5 +1,7 @@
 - name: Home
   href: intro.md
+- name: Safe Naming Practices
+  href: save_naming.md
 - name: Intro to State Logic
   href: state.md
 - name: Implementing State Logic
