@@ -1,20 +1,20 @@
 The following symbols are reserved for use in infix logic:
-- Left parens '(', right parens ')', plus '+', and vertical bar '|' (used for basic operations)
-- Less than '<', equals '=', and greater than '>' (used for comparison operations)
-- Asterisk '\*' (used to create reference tokens)
-- Question mark '?' (used to create coallescing tokens)
-- Some symbols are not currently used, but are reserved for future use: '!', '~', '`', '/', '\', '@', '#', '%', '^', '&', '.'
+- Left parens `(`, right parens `)`, plus `+`, and vertical bar `|` (used for basic operations)
+- Less than `<`, equals `=`, and greater than `>` (used for comparison operations)
+- Asterisk `*` (used to create reference tokens)
+- Question mark `?` (used to create coallescing tokens)
+- Some symbols are not currently used, but are reserved for future use: `!`, `~`, `` ` ``, `/`, `\`, `@`, `#`, `%`, `^`, `&`, `.`
 
 The following symbols are safe to include in logic:
-- Underscore '_'
-- Hyphen '-' 
-- Square brackets '[' and ']'
-- Curly brackets '{' and '}'
-- Apostrophe '''
-- Comma ','
-- Semicolon ';'
-- Colon ':'
-- Dollar sign '$'
+- Underscore `_`
+- Hyphen `-`
+- Square brackets `[` and `]`
+- Curly brackets `{` and `}`
+- Apostrophe `'`
+- Comma `,`
+- Semicolon `;`
+- Colon `:`
+- Dollar sign `$`
 
 Also, it should be noted that leading and trailing white space is stripped from tokens when an infix expression is tokenized. Internal white space is safe to use.
 
