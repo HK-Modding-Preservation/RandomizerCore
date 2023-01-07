@@ -1,6 +1,6 @@
 ## Defining State Fields
 
-State fields can be defined by using the StateManagerBuilder attached to a LogicManagerBuilder, or by defining them in a Json file and feeding the file into the LogicManagerBuilder. Once defined, the default value of a state field can be changed, but its type and name cannot be changed.
+State fields can be defined by using the StateManagerBuilder attached to a LogicManagerBuilder, or by defining them in a Json file and feeding the file into the LogicManagerBuilder. Once defined, the type and name of a state field cannot be changed. Custom properties can be assigned to the state field via the StateManagerBuilder; this mechanism, for example, allows specifying the default value of the field and many other things.
 
 When adding a state field, it is essential to carefully consider how it will interact with the State ordering. For example, by default, state bools default to false, and can be set true. This is ideal for representing a consumable resource which one starts with, and can be spent once. States which have spent the resource will be discarded if there is a strictly better alternative which has not spent the resource. On the other hand, to represent a resource which one does not start with, but can be obtained once later, the state bool should be created to default to true, and be set false once the resource is obtained, so that states with the resource will not be pruned.
 
@@ -23,6 +23,14 @@ ProvideState can be optionally overriden, to express when the StateModifier is a
 Ordinarily, input state is determined by the first state-valued term (e.g. transition or waypoint) which appears in a conjunction. However, a StateProvider variable can be defined to supply a state determined in code, if it appears before any other state provider terms or variables in the conjunction. For example, "$START" provides the state which has all fields at their default values.
 
 A StateProvider is additionally a LogicInt. By default, its LogicInt.GetValue always returns LogicVariable.TRUE, but this can be overriden if desired.
+
+### StateAccessVariable
+
+A StateAccessVariable receives progression data and a state, and produces an int. These can be used in comparisons (i.e. expressions with '<','=', or '>') and the interpretation of one which is not in a comparison is that `VAR` is equivalent to `VAR>0`.
+
+In standard logic, a StateAccessVariable acts in sequence with the other StateModifiers and StateAccessVariables. In this context, it acts like a filter, rejecting states which fail its comparison. A StateAccessVariable comparison can be seen as a kind of StateModifier, where ModifyState returns its input if the comparison succeeds, and returns empty if the comparison fails. ProvideState, in this analogy, would always return null, since the StateAccessVariable cannot be evaluated without a state.
+
+RandomizerCore has a builtin class of StateAccessVariables which are recognized by the default VariableResolver: StateFieldAccessors. These are represented in logic by the exact name of a state field. For a state int, the StateFieldAccessor retrieves the value of the int from its input state. For a state bool, the StateFieldAccessor retrieves 1 if the bool is true, and 0 otherwise.
 
 ## Integration with the ProgressionManager and MainUpdater
 
