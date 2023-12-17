@@ -20,20 +20,34 @@ ProvideState can be optionally overriden, to express when the StateModifier is a
 
 ### StateProvider
 
-Ordinarily, input state is determined by the first state-valued term (e.g. transition or waypoint) which appears in a conjunction. However, a StateProvider variable can be defined to supply a state determined in code, if it appears before any other state provider terms or variables in the conjunction. For example, "$START" provides the state which has all fields at their default values.
+Ordinarily, input state is determined by the first state-valued term (e.g. transition or waypoint) which appears in a conjunction. However, a StateProvider variable can be defined to supply a state determined in code, if it appears before any other state provider terms or variables in the conjunction. For example, `$DEFAULTSTATE` provides a StateUnion containing the state which has all fields at their default values. `$ANY` provides an empty StateUnion.
 
-A StateProvider is additionally a LogicInt. By default, its LogicInt.GetValue always returns LogicVariable.TRUE, but this can be overriden if desired.
+A StateProvider is additionally a LogicInt. Its `LogicInt.GetValue` returns 1 if the provided state is non-null, and 0 otherwise.
 
 ### StateAccessVariable
 
-A StateAccessVariable receives progression data and a state, and produces an int. These can be used in comparisons (i.e. expressions with '<','=', or '>') and the interpretation of one which is not in a comparison is that `VAR` is equivalent to `VAR>0`.
+A StateAccessVariable receives progression data and a state, and produces an int. These can be used in comparisons (i.e. expressions with '<','=', or '>'), and can be seen as a special type of StateModifier which filters out states that fail the comparison. In other words, ModifyState returns its state input as a singleton sequence if the comparison succeeds, and returns an empty sequence if the comparison fails. ProvideState always return null, since we cannot say that the comparison would succeed for an indeterminate state.
 
-In standard logic, a StateAccessVariable acts in sequence with the other StateModifiers and StateAccessVariables. In this context, it acts like a filter, rejecting states which fail its comparison. A StateAccessVariable comparison can be seen as a kind of StateModifier, where ModifyState returns its input if the comparison succeeds, and returns empty if the comparison fails. ProvideState, in this analogy, would always return null, since the StateAccessVariable cannot be evaluated without a state.
-
-RandomizerCore has a builtin class of StateAccessVariables which are recognized by the default VariableResolver: StateFieldAccessors. These are represented in logic by the exact name of a state field. For a state int, the StateFieldAccessor retrieves the value of the int from its input state. For a state bool, the StateFieldAccessor retrieves 1 if the bool is true, and 0 otherwise.
+RandomizerCore has a builtin class of StateAccessVariables which are recognized by the default VariableResolver: StateFieldAccessors. These are represented in logic by the exact name of a state field, when used in a comparison. For a state int, the StateFieldAccessor retrieves the value of the int from its input state. For a state bool, the StateFieldAccessor retrieves 1 if the bool is true, and 0 otherwise.
 
 ## Integration with the ProgressionManager and MainUpdater
 
 When evaluating bool logic, all terms are interpreted as int-valued. The int value of a state-valued term is 0 if its state is null, and 1 otherwise. This is the value returned by pm.Get(id) if id is the id of a state-valued term, and the value used for derived computations such as pm.Has, etc. Use pm.GetState to retrieve the full StateUnion associated with the term.
 
 The MainUpdater automatically manages logic-derived state updates for state-valued waypoints and transitions. Use mu.AddManagedStates to give a state-valued term logic-derived state updates. Often, the effect of an item may be to trigger an ongoing state modification. This can be done by modifying the MainUpdater attached to the ProgressionManager. If the state effect depends on the item's location, this can further be done within an ILocationDependentItem implementation for the item.
+
+## Warnings in State Logic Generation
+
+### DNF Clause Count
+A warning is generated when the expansion of logic into disjunctive normal form produces a large number of clauses. To avoid degraded performance:
+- Avoid adding redundant branches to logic. When adding disjunctions as in `(A1 | B1) + (A2 | B2) + ... + (An | Bn)`, the number of clauses grows exponentially as `2^n`, so eliminating branches can yield large savings. Note that these disjunctions may be hidden from view through macros or logic references, but are still costly.
+- Consider moving part of the logic into a waypoint. Waypoints can potentially be more efficient as they do not have to recompute logic as often.
+
+### Ambiguous State Provider
+A warning is generated when a clause in the disjunctive normal form contains multiple state providers (state-valued terms or StateProvider variables). To avoid the warning, one can add a trailing `/` to the non-provider, as in `Room[left] + Room[right]/`. However, if the situation requires the state from both providers (for example, the first one provides the state that should propagate forward, but the other needs to satisfy a state condition), then the logic for the second state provider should be moved to a new logic def or waypoint, and changed to a reference or waypoint term accordingly.
+
+### Missing State Provider
+A warning is generated when logic in disjunctive normal form contains some clauses with state providers and some clauses without. To avoid the warning, do one of the following:
+- Move the state-valued logic to a stateless waypoint, and use the waypoint in the stateless logic.
+- Use the trailing `/` to suppress the state providers in the relevant clauses. Note that this does not work if state modifiers are present.
+- Add a state provider to the stateless logic. Common choices would be `$ANY` or `$DEFAULTSTATE`.
