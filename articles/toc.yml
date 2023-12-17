@@ -2,6 +2,8 @@
   href: intro.md
 - name: Safe Naming Practices
   href: safe_naming.md
+- name: Item Strings
+  jref: item_strings.md
 - name: Intro to State Logic
   href: state.md
 - name: Implementing State Logic
