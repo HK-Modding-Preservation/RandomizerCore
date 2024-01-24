@@ -51,3 +51,6 @@ A warning is generated when logic in disjunctive normal form contains some claus
 - Move the state-valued logic to a stateless waypoint, and use the waypoint in the stateless logic.
 - Use the trailing `/` to suppress the state providers in the relevant clauses. Note that this does not work if state modifiers are present.
 - Add a state provider to the stateless logic. Common choices would be `$ANY` or `$DEFAULTSTATE`.
+
+### State Modifier occurring before State Provider
+A warning is generated when logic in disjunctive normal form contains a conjunctive clause with a state modifier occurring to the left of the state provider. To avoid the warning, move the state provider to occur before any state modifiers. For example, replace `$StateModifier + Transition` with `Transition + $StateModifier`. These clauses are equivalent in meaning, but it is preferred to list the state provider first to avoid confusion regarding order of application.
